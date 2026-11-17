@@ -102,5 +102,27 @@ namespace TestSeleniumRecords
             driver.Quit();
         }
 
+        [TestMethod]
+        public void TestFilteringByArtist()
+        {
+            // Arrange
+            IWebDriver driver = new ChromeDriver();
+            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
+
+            // Act
+            driver.FindElement(By.Id("showRecordsBtn")).Click();
+            Thread.Sleep(1000);
+            driver.FindElement(By.Id("filterByArtist")).SendKeys("Batman");
+            Thread.Sleep(1000);
+            driver.FindElement(By.Id("filterByArtistBtn")).Click();
+            Thread.Sleep(1000);
+
+            // Assert
+            var rows = driver.FindElements(By.CssSelector("#recordsTable tbody tr"));
+            Assert.AreEqual(1, rows.Count);
+            StringAssert.Contains(rows[0].Text, "Batman");
+
+            driver.Quit();
+        }
     }
 }
