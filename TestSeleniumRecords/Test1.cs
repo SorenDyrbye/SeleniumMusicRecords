@@ -1,18 +1,29 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+
 namespace TestSeleniumRecords
 {
     [TestClass]
     public sealed class Test1
     {
-        [TestMethod]
+        private IWebDriver driver = null!;
 
+        [TestInitialize]
+        public void Setup()
+        {
+            driver = new ChromeDriver();
+            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            driver.Quit();
+        }
+
+        [TestMethod]
         public void LoggedInUserIsAdmin()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
             // Act
             driver.FindElement(By.Id("username")).SendKeys("admin");
             driver.FindElement(By.Id("password")).SendKeys("1234");
@@ -22,50 +33,29 @@ namespace TestSeleniumRecords
             // Assert
             string tekst = driver.FindElement(By.Id("logged-in")).Text;
             Assert.AreEqual("Logged in as: admin", tekst);
-
-            driver.Quit();
         }
 
         [TestMethod]
         public void ShowRecordsButtonIsVisible()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
-            // Act
-
             // Assert
-            bool isVisible = driver.FindElement(By.Id("showRecordsBtn")).Displayed;
-            Assert.IsTrue(isVisible);
-
-            driver.Quit();
+            Assert.IsTrue(driver.FindElement(By.Id("showRecordsBtn")).Displayed);
         }
 
         [TestMethod]
-        public void ShowlistWithButtonClick()
+        public void ShowListWithButtonClick()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
             // Act
             driver.FindElement(By.Id("showRecordsBtn")).Click();
+            Thread.Sleep(1000);
 
             // Assert
-            bool isListVisible = driver.FindElement(By.Id("recordsTable")).Displayed;
-            Assert.IsTrue(isListVisible);
-
-            driver.Quit();
+            Assert.IsTrue(driver.FindElement(By.Id("recordsTable")).Displayed);
         }
 
         [TestMethod]
         public void ShowListHiddenWithButtonClick()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
             // Act
             driver.FindElement(By.Id("showRecordsBtn")).Click();
             Thread.Sleep(1000);
@@ -74,46 +64,31 @@ namespace TestSeleniumRecords
 
             // Assert
             Assert.IsFalse(driver.FindElements(By.Id("recordsTable")).Any());
-
-            driver.Quit();
         }
 
         [TestMethod]
         public void TestFilteringByTitle()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
             // Act
             driver.FindElement(By.Id("showRecordsBtn")).Click();
             Thread.Sleep(1000);
             driver.FindElement(By.Id("filterByTitle")).SendKeys("Kiss");
-            Thread.Sleep(1000);
             driver.FindElement(By.Id("filterByTitleBtn")).Click();
             Thread.Sleep(1000);
-
 
             // Assert
             var rows = driver.FindElements(By.CssSelector("#recordsTable tbody tr"));
             Assert.AreEqual(1, rows.Count);
             StringAssert.Contains(rows[0].Text, "Kiss");
-
-            driver.Quit();
         }
 
         [TestMethod]
         public void TestFilteringByArtist()
         {
-            // Arrange
-            IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://127.0.0.1:5500/");
-
             // Act
             driver.FindElement(By.Id("showRecordsBtn")).Click();
             Thread.Sleep(1000);
             driver.FindElement(By.Id("filterByArtist")).SendKeys("Batman");
-            Thread.Sleep(1000);
             driver.FindElement(By.Id("filterByArtistBtn")).Click();
             Thread.Sleep(1000);
 
@@ -121,8 +96,27 @@ namespace TestSeleniumRecords
             var rows = driver.FindElements(By.CssSelector("#recordsTable tbody tr"));
             Assert.AreEqual(1, rows.Count);
             StringAssert.Contains(rows[0].Text, "Batman");
+        }
 
-            driver.Quit();
+        [TestMethod]
+        public void TestUpdateRecord()
+        {
+            // Act
+            driver.FindElement(By.Id("showRecordsBtn")).Click();
+            Thread.Sleep(1000);
+            driver.FindElement(By.Id("updateBtn")).Click();
+            Thread.Sleep(1000);
+
+            var titel = driver.FindElement(By.CssSelector("tbody tr input"));
+            titel.Clear();
+            titel.SendKeys("Warhammer Song");
+
+            driver.FindElement(By.Id("saveBtn")).Click();
+            Thread.Sleep(1000);
+
+            // Assert
+            string tekst = driver.FindElement(By.CssSelector("tbody tr td")).Text;
+            Assert.AreEqual("Warhammer Song", tekst);
         }
     }
 }
