@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SeleniumMusicRecords/SeleniumMusicRecords.csproj" />
+  <Project Path="TestSeleniumRecords/TestSeleniumRecords.csproj" Id="0a7be145-b199-4340-bbad-a937ece551ac" />
+</Solution>
